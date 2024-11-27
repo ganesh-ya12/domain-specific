@@ -4,6 +4,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 // import { routes } from './routes.js';
 import SharedLayout from './components/SharedLayout.jsx';
 import  Home from './components/Home.jsx';
+import About from './components/About.jsx';
+import Documentation from './components/Documentation.jsx';
+import ChatBot from './components/ChatBot.jsx';
 const App = () => (
   
   <BrowserRouter>
@@ -11,6 +14,9 @@ const App = () => (
     <SharedLayout/>
     <Routes>
       <Route path='/' element={<Home/>}/>
+      <Route path='/about' element={<About/>}/>
+      <Route path='/docs' element={<Documentation/>}/>
+      <Route path='/chat' element={<ChatBot/>}/>
       {/* <Route path="/" element={<SharedLayout />}>
         {routes.map(({ path, component: Component, isPrivate }) => (
             key={path} 

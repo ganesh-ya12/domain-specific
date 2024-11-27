@@ -89,4 +89,4 @@ const Documentation = () => {
     );
   };
   
-  export { Documentation };
+  export default  Documentation ;
