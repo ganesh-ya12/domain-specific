@@ -15,7 +15,7 @@ const FeatureCard = ({ icon: Icon, title, description }) => (
 
 const Home = () => {
   return (
-    <div className="relative overflow-hidden bg-black">
+    <div className="relative overflow-hidden bg-black w-screen">
       {/* Hero Section */}
       <section className="relative pt-16 md:pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

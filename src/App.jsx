@@ -8,6 +8,7 @@ import About from './components/About.jsx';
 import Documentation from './components/Documentation.jsx';
 import ChatBot from './components/ChatBot.jsx';
 import FileUploader from './FileUpload.jsx';
+import Login from './components/Login.jsx';
 const App = () => (
   
   <BrowserRouter>
@@ -19,6 +20,7 @@ const App = () => (
       <Route path='/docs' element={<Documentation/>}/>
       <Route path='/chat' element={<ChatBot/>}/>
       <Route path='/fileupload' element={<FileUploader/>}/>
+      <Route path='/login' element={<Login/>}/>
       {/* <Route path="/" element={<SharedLayout />}>
         {routes.map(({ path, component: Component, isPrivate }) => (
             key={path} 
