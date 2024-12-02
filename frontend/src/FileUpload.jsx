@@ -30,6 +30,35 @@ const FileUploader = () => {
     fileInputRef.current.click();
   };
 
+  const handleCreateDataset = async () => {
+    if (files.length === 0) {
+      alert("No files selected!");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("file", files[0]); // Sending the first file as an example
+  
+    try {
+      const response = await fetch("https://576e-34-125-104-111.ngrok-free.app/process_pdf", {
+        method: "POST",
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to process PDF");
+      }
+  
+      const result = await response.json();
+      console.log(result); // Log the dataset or handle it as needed
+      alert("Dataset created successfully!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred while creating the dataset.");
+    }
+  };
+  
+
   return (
     <div 
       className="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center"
@@ -79,6 +108,18 @@ const FileUploader = () => {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {files.length > 0 && (
+        <div className="mt-6">
+          <button 
+            onClick={handleCreateDataset}
+            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={files.length === 0}
+          >
+            Create Dataset
+          </button>
         </div>
       )}
     </div>
