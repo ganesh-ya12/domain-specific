@@ -46,12 +46,12 @@ const SharedLayout = () => {
               </Link>
 
               {/* Login Button */}
-              <Link
+              {/* <Link
                 to="/login"
                 className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
               >
                 Login
-              </Link>
+              </Link> */}
 
               <div className="relative">
                 <button
@@ -119,12 +119,12 @@ const SharedLayout = () => {
               >
                 Dashboard
               </Link>
-              <Link
+              {/* <Link
                 to="/login"
                 className="block px-3 py-2 text-base text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
               >
                 Login
-              </Link>
+              </Link> */}
             </div>
           </div>
         )}

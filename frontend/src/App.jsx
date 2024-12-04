@@ -9,6 +9,7 @@ import Documentation from './components/Documentation.jsx';
 import ChatBot from './components/ChatBot.jsx';
 import FileUploader from './FileUpload.jsx';
 import Login from './components/Login.jsx';
+import Signup from './components/Signup.jsx';
 const App = () => (
   
   <BrowserRouter>
@@ -21,6 +22,7 @@ const App = () => (
       <Route path='/chat' element={<ChatBot/>}/>
       <Route path='/fileupload' element={<FileUploader/>}/>
       <Route path='/login' element={<Login/>}/>
+      <Route path='/signup' element={<Signup/>}/>
       {/* <Route path="/" element={<SharedLayout />}>
         {routes.map(({ path, component: Component, isPrivate }) => (
             key={path} 

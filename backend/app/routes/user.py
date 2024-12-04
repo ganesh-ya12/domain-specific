@@ -21,6 +21,7 @@ def get_jwt_secret():
 @user_bp.route('/signup', methods=["POST"])
 def signup():
     data = request.get_json()
+    print(f"Signup request data: {request.get_json()}")
     if mongo.db.users.find_one({"email": data['email']}):
         return jsonify({"message": "User exists with given email"}), 400
     if data['password'] != data['confirmPass']:
