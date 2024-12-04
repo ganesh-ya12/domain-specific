@@ -48,18 +48,21 @@ const About = () => (
       <div className="text-center mb-16">
         <h2 className="text-3xl font-bold text-white mb-12">Our Team</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[
-            { name: 'Alex Chen', role: 'CEO & Founder', image: 'alex.jpg' },
-            { name: 'Sarah Kim', role: 'CTO', image: 'sarah.jpg' },
-            { name: 'Mike Ross', role: 'Head of AI', image: 'mike.jpg' }
-          ].map((member) => (
-            <div key={member.name} className="bg-gray-900 rounded-xl p-6 border border-gray-800">
-              <div className="w-24 h-24 rounded-full bg-gray-800 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white">{member.name}</h3>
-              <p className="text-gray-400">{member.role}</p>
-            </div>
-          ))}
-        </div>
+  {[
+    { name: 'Alex Chen', role: 'CEO & Founder', image: '/johns.jpg' },
+    { name: 'Sarah Kim', role: 'CTO', image: '/johns.jpg' },
+    { name: 'Mike Ross', role: 'Head of AI', image: '/johns.jpg' }
+  ].map((member) => (
+    <div key={member.name} className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+      <div className="w-24 h-24 rounded-full bg-gray-800 mx-auto mb-4">
+        <img src={member.image} alt={member.name} className="w-full h-full rounded-full object-cover" />
+      </div>
+      <h3 className="text-xl font-semibold text-white">{member.name}</h3>
+      <p className="text-gray-400">{member.role}</p>
+    </div>
+  ))}
+</div>
+
       </div>
     </div>
   </div>

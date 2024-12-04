@@ -70,10 +70,18 @@ def set_preferences():
     
     return jsonify({"message": "Preferences saved successfully"}), 200
 
-@user_bp.route('/login', methods=['POST'])
+@user_bp.route('/login', methods=['POST','OPTIONS'])
 def login():
+    if request.method == 'OPTIONS':
+        # Handle preflight request for CORS
+        response = jsonify({"message": "CORS preflight"})
+        response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        return response
+
     data = request.get_json()
-    user = mongo.db.users.find_one({"username": data['username']})
+    user = mongo.db.users.find_one({"email": data['email']})
     if not user:
         return jsonify({'message': "Username or email doesn't exist"}), 400
     if not bcrypt.checkpw(data['password'].encode('utf-8'), user['password'].encode('utf-8')):
@@ -86,7 +94,7 @@ def login():
     }
     
     token = jwt.encode(payload, get_jwt_secret(), algorithm='HS256')
-    response = make_response(jsonify({'message': "User logged in successfully", "token": token, "username": data["username"]}))
+    response = make_response(jsonify({'message': "User logged in successfully", "token": token}))
     response.status_code = 200
     response.set_cookie('access_token', token, httponly=True, secure=True, samesite='None')
     

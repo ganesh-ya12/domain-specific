@@ -7,28 +7,31 @@ import {
   Linkedin, 
   AlertTriangle 
 } from 'lucide-react';
-
+import axios from 'axios';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
+  const [message,setMessage]=useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    // Basic validation
-    if (!email || !password) {
-      setError('Please enter both email and password');
-      return;
+    try{
+      const response = await axios.post('http://127.0.0.1:5000/user/login',{email,password}, {
+        headers: {
+          'Content-Type': 'application/json',
+        }});
+      if(response.status==200){
+        setMessage('Login succesful');
+      }
+      else{
+        setMessage(response);
+      }
     }
-
-    // Placeholder for actual authentication
-    try {
-      // Simulated login logic
-      console.log('Login attempt:', { email, password, rememberMe });
-      setError('');
-    } catch (loginError) {
-      setError('Authentication failed. Please check your credentials.');
+    catch(error){
+      setMessage('An error occured');
+      console.log(error);
     }
   };
 
@@ -171,6 +174,7 @@ const Login = () => {
                 Sign up
               </a>
             </p>
+            {message && <p>{message}</p>}
           </div>
         </div>
       </div>
