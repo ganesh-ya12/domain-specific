@@ -72,4 +72,3 @@ def get_user_documents():
 
     response, status_code = file_manager.get_user_files(user_id)
     return jsonify(response), status_code
-
