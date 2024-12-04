@@ -7,6 +7,12 @@ from app.database import mongo
 from app.middleware.userMiddleware import token_required
 
 user_bp = Blueprint('user', __name__)
+google_bp = make_google_blueprint(
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    scope=["profile", "email"],
+    redirect_to='google.callback'
+)
 
 def hash_password(password):
     salt = bcrypt.gensalt()

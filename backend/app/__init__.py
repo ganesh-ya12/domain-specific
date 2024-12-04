@@ -14,4 +14,4 @@ def create_app():
     @app.route('/')
     def home():
         return jsonify({'message':"welcome to domain speific llm"})
-    return app
+    return app 
