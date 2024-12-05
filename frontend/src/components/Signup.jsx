@@ -2,50 +2,58 @@ import React, { useState } from 'react';
 import { 
   Mail, 
   Lock, 
+  User, 
   LogIn, 
   Github, 
   Linkedin, 
   AlertTriangle 
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
+const Signup = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [confirmPass, setConfirmPass] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  
-  // Add navigation hook
-  const navigate = useNavigate();
+  const handleLogin =()=>{
+    navigate('/login');
+  }
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (password !== confirmPass) {
+      setError('Passwords do not match');
+      return;
+    }
+
     try {
-      const response = await axios.post('http://127.0.0.1:5000/user/login', { email, password }, {
+      const response = await axios.post('http://127.0.0.1:5000/user/signup', {
+        email,
+        username,
+        password,confirmPass
+      }, {
         headers: {
           'Content-Type': 'application/json',
         }
       });
-      
+
       if (response.status === 200) {
-        setMessage('Login successful');
-        // Optional: Add navigation logic after successful login
-        // navigate('/dashboard');
-        navigate('/')
+        setMessage('Signup successful');
+        setError('');
+        navigate('/login')
       } else {
-        setMessage(response);
+        setMessage('Signup failed');
       }
     } catch (error) {
-      setMessage('An error occurred');
+      setError('An error occurred during signup');
       console.log(error);
     }
-  };
-
-  // Handler for navigating to signup page
-  const handleSignupNavigation = () => {
-    navigate('/signup');
   };
 
   return (
@@ -73,7 +81,7 @@ const Login = () => {
               </svg>
             </div>
             <h1 className="text-2xl font-bold text-gray-100">AI Bot Platform</h1>
-            <p className="text-gray-400 mt-2">Sign in to your account</p>
+            <p className="text-gray-400 mt-2">Create your account</p>
           </div>
 
           {/* Error Message */}
@@ -84,8 +92,9 @@ const Login = () => {
             </div>
           )}
 
-          {/* Login Form */}
-          <form onSubmit={handleLogin} className="space-y-4">
+          {/* Signup Form */}
+          <form onSubmit={handleSignup} className="space-y-4">
+            {/* Email Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Mail className="text-gray-500 h-5 w-5" />
@@ -100,6 +109,22 @@ const Login = () => {
               />
             </div>
 
+            {/* Username Input */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User className="text-gray-500 h-5 w-5" />
+              </div>
+              <input 
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-700 text-gray-200 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            {/* Password Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Lock className="text-gray-500 h-5 w-5" />
@@ -114,41 +139,30 @@ const Login = () => {
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input 
-                  type="checkbox"
-                  id="remember-me"
-                  checked={rememberMe}
-                  onChange={() => setRememberMe(!rememberMe)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 bg-gray-700 border-gray-600 rounded"
-                />
-                <label 
-                  htmlFor="remember-me" 
-                  className="ml-2 block text-sm text-gray-300"
-                >
-                  Remember me
-                </label>
+            {/* Confirm Password Input */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="text-gray-500 h-5 w-5" />
               </div>
-              <div className="text-sm">
-                <a 
-                  href="#" 
-                  className="font-medium text-blue-500 hover:text-blue-400"
-                >
-                  Forgot password?
-                </a>
-              </div>
+              <input 
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPass}
+                onChange={(e) => setConfirmPass(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-700 text-gray-200 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
             </div>
 
             <button 
               type="submit" 
               className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300"
             >
-              <LogIn className="mr-2 h-5 w-5" /> Sign In
+              <LogIn className="mr-2 h-5 w-5" /> Sign Up
             </button>
           </form>
 
-          {/* Social Login Divider */}
+          {/* Social Signup Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-700"></div>
@@ -160,7 +174,7 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Social Login Buttons */}
+          {/* Social Signup Buttons */}
           <div className="grid grid-cols-2 gap-3">
             <button 
               type="button"
@@ -176,18 +190,18 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Sign Up Link */}
+          {/* Login Link */}
           <div className="text-center">
             <p className="mt-2 text-sm text-gray-500">
-              Don't have an account?{' '}
-              <button 
-                onClick={handleSignupNavigation}
+              Already have an account?{' '}
+              <a 
+                href="#" 
                 className="font-medium text-blue-500 hover:text-blue-400"
               >
-                Sign up
-              </button>
+                Log in
+              </a>
             </p>
-            {message && <p className="text-center mt-2 text-green-500">{message}</p>}
+            {message && <p className="text-green-500 mt-2 text-center">{message}</p>}
           </div>
         </div>
       </div>
@@ -195,4 +209,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
