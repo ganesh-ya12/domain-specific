@@ -1,4 +1,6 @@
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, jsonify, make_response, redirect, request, url_for
+from flask_dance.contrib.google import make_google_blueprint, google
+from flask_dance.contrib.github import make_github_blueprint, github
 import bcrypt
 import jwt
 import os
@@ -7,12 +9,21 @@ from app.database import mongo
 from app.middleware.userMiddleware import token_required
 
 user_bp = Blueprint('user', __name__)
-google_bp = make_google_blueprint(
-    client_id=os.getenv("GOOGLE_CLIENT_ID"),
-    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
-    scope=["profile", "email"],
-    redirect_to='google.callback'
-)
+
+
+# Google OAuth Blueprint
+google_bp = make_google_blueprint(client_id=os.getenv('GOOGLE_CLIENT_ID'),
+                                  client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
+                                  redirect_to='google.callback')
+
+# GitHub OAuth Blueprint
+github_bp = make_github_blueprint(client_id=os.getenv('GITHUB_CLIENT_ID'),
+                                  client_secret=os.getenv('GITHUB_CLIENT_SECRET'),
+                                  redirect_to='user.github_login')
+
+# # Register blueprints for Google and GitHub
+# user_bp.register_blueprint(google_bp, url_prefix='/google_login')
+# user_bp.register_blueprint(github_bp, url_prefix='/github_login')
 
 def hash_password(password):
     salt = bcrypt.gensalt()
@@ -23,7 +34,75 @@ def get_jwt_secret():
     if secret is None:
         raise RuntimeError("JWT_SECRET environment variable is not set.")
     return secret
+# Google OAuth Callback Route
+@google_bp.route('/callback')
+def google_callback():
+    if not google.authorized:
+        return redirect(url_for('google.login'))
 
+    # Get user info
+    google_user = google.get('/plus/v1/people/me')
+    user_info = google_user.json()
+    
+    # Check if user exists in the database, or create a new user
+    user = mongo.db.users.find_one({"email": user_info['emails'][0]['value']})
+    if not user:
+        # Create a new user if not found
+        user_data = {
+            'username': user_info['displayName'],
+            'email': user_info['emails'][0]['value'],
+            'created_at': datetime.datetime.utcnow(),
+            'access_level': 'user'  # Default value
+        }
+        mongo.db.users.insert_one(user_data)
+    
+    # Create JWT token for the user
+    payload = {
+        "username": user_info['displayName'],
+        "email": user_info['emails'][0]['value'],
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30)
+    }
+    token = jwt.encode(payload, get_jwt_secret(), algorithm='HS256')
+    
+    # Return JWT token as a cookie
+    response = make_response(jsonify({'message': "Login successful", "token": token}))
+    response.set_cookie('access_token', token, httponly=True, secure=True, samesite='None')
+    return response
+
+# GitHub OAuth Callback Route
+@user_bp.route('/github/callback')
+def github_callback():
+    if not github.authorized:
+        return redirect(url_for('github.login'))
+
+    # Get user info
+    github_user = github.get('/user')
+    user_info = github_user.json()
+
+    # Check if user exists in the database, or create a new user
+    user = mongo.db.users.find_one({"email": user_info['email']})
+    if not user:
+        # Create a new user if not found
+        user_data = {
+            'username': user_info['login'],
+            'email': user_info['email'],
+            'created_at': datetime.datetime.utcnow(),
+            'access_level': 'user'  # Default value
+        }
+        mongo.db.users.insert_one(user_data)
+    
+    # Create JWT token for the user
+    payload = {
+        "username": user_info['login'],
+        "email": user_info['email'],
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30)
+    }
+    token = jwt.encode(payload, get_jwt_secret(), algorithm='HS256')
+    
+    # Return JWT token as a cookie
+    response = make_response(jsonify({'message': "Login successful", "token": token}))
+    response.set_cookie('access_token', token, httponly=True, secure=True, samesite='None')
+    return response
 @user_bp.route('/signup', methods=["POST"])
 def signup():
     data = request.get_json()
@@ -53,28 +132,6 @@ def signup():
     except Exception as e:
         return jsonify({"message": f"Error creating user: {str(e)}"}), 500
 
-@user_bp.route('/preferences', methods=["POST"])
-@token_required
-def set_preferences():
-    token = request.cookies.get('access_token')
-    if not token:
-        return jsonify({"message": "User not found"}), 400
-    decoded_user = jwt.decode(token, get_jwt_secret(), algorithms=['HS256'])
-
-    data = request.get_json()
-    preferences = {
-        "industry": data.get("industry"),
-        "language": data.get("language"),
-        "llm_experience": data.get("llm_experience"),
-        "rag_experience": data.get("rag_experience")
-    }
-
-    mongo.db.users.update_one(
-        {"username": decoded_user['username']},
-        {"$set": {"preferences": preferences}}
-    )
-    
-    return jsonify({"message": "Preferences saved successfully"}), 200
 
 @user_bp.route('/login', methods=['POST','OPTIONS'])
 def login():
@@ -111,6 +168,30 @@ def logout():
     response = make_response(jsonify({"message": "Logged out successfully"}))
     response.set_cookie('access_token', '', expires=0)
     return response
+
+@user_bp.route('/preferences', methods=["POST"])
+@token_required
+def set_preferences():
+    token = request.cookies.get('access_token')
+    if not token:
+        return jsonify({"message": "User not found"}), 400
+    decoded_user = jwt.decode(token, get_jwt_secret(), algorithms=['HS256'])
+
+    data = request.get_json()
+    preferences = {
+        "industry": data.get("industry"),
+        "language": data.get("language"),
+        "llm_experience": data.get("llm_experience"),
+        "rag_experience": data.get("rag_experience")
+    }
+
+    mongo.db.users.update_one(
+        {"username": decoded_user['username']},
+        {"$set": {"preferences": preferences}}
+    )
+    
+    return jsonify({"message": "Preferences saved successfully"}), 200
+
 
 @user_bp.route('/find', methods=['GET'])
 @token_required
