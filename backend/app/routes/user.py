@@ -14,7 +14,7 @@ user_bp = Blueprint('user', __name__)
 # Google OAuth Blueprint
 google_bp = make_google_blueprint(client_id=os.getenv('GOOGLE_CLIENT_ID'),
                                   client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
-                                  redirect_to='google.callback')
+                                  redirect_to='google.google_callback')
 
 # GitHub OAuth Blueprint
 github_bp = make_github_blueprint(client_id=os.getenv('GITHUB_CLIENT_ID'),

@@ -22,7 +22,32 @@ const Signup = () => {
   const handleLogin =()=>{
     navigate('/login');
   }
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/callback', {
+        method: 'GET',
+        credentials: 'include',
+       mode: 'no-cors', // Required for sending cookies
+      });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (data.token) {
+        localStorage.setItem('access_token', data.token);
+        console.log('Login successful');
+      } 
+    } catch (error) {
+      console.error('CORS or other error occurred:', error);
+    }
+};
+
+  
+  
   const handleSignup = async (e) => {
     e.preventDefault();
     
@@ -43,7 +68,7 @@ const Signup = () => {
         }
       });
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         setMessage('Signup successful');
         setError('');
         navigate('/login')
@@ -176,7 +201,7 @@ const Signup = () => {
 
           {/* Social Signup Buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <button 
+            <button onClick={handleGoogleLogin}
               type="button"
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg shadow-sm bg-gray-800 text-sm font-medium text-gray-300 hover:bg-gray-700"
             >

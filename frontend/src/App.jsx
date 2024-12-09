@@ -11,6 +11,7 @@ import FileUploader from './FileUpload.jsx';
 import Login from './components/Login.jsx';
 import Signup from './components/Signup.jsx';
 const App = () => (
+  // const token = 
   
   <BrowserRouter>
   
