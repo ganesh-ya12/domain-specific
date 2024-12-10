@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -19,36 +21,51 @@ const Signup = () => {
   const [confirmPass, setConfirmPass] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const handleLogin =()=>{
+
+  const handleLogin = () => {
     navigate('/login');
   }
-  const handleGoogleLogin = async () => {
+
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/callback', {
-        method: 'GET',
-        credentials: 'include',
-       mode: 'no-cors', // Required for sending cookies
+      // Decode the Google credential
+      const decoded = jwtDecode(credentialResponse.credential);
+      
+      // Extract user information from the decoded token
+      const { email, name } = decoded;
+
+      // Send the Google user data to your backend
+      const response = await axios.post('http://localhost:5000/user/callback', {
+        email,
+        username: name,
+        googleId: decoded.sub // Google's unique user ID
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.status === 201) {
+        setMessage('Signup successful');
+        // localStorage.setItem();
+        setError('');
+        navigate('/home');
+      } else {
+        setMessage('Signup failed');
       }
-
-      const data = await response.json();
-      console.log('Response data:', data);
-
-      if (data.token) {
-        localStorage.setItem('access_token', data.token);
-        console.log('Login successful');
-      } 
     } catch (error) {
-      console.error('CORS or other error occurred:', error);
+      setError('An error occurred during Google signup');
+      console.error(error);
     }
-};
+  };
 
-  
-  
-  const handleSignup = async (e) => {
+  const handleGoogleFailure = (error) => {
+    console.error('Google Sign-In was unsuccessful', error);
+    setError('Google Sign-In failed');
+  };
+
+  const handleStandardSignup = async (e) => {
     e.preventDefault();
     
     // Basic validation
@@ -58,14 +75,17 @@ const Signup = () => {
     }
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/user/signup', {
+      const response = await axios.post('http://localhost:5000/user/signup', {
         email,
         username,
-        password,confirmPass
+        password,
+        confirmPass
       }, {
         headers: {
           'Content-Type': 'application/json',
-        }
+
+        },
+        withCredentials:true
       });
 
       if (response.status === 201) {
@@ -118,7 +138,7 @@ const Signup = () => {
           )}
 
           {/* Signup Form */}
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleStandardSignup} className="space-y-4">
             {/* Email Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -201,12 +221,21 @@ const Signup = () => {
 
           {/* Social Signup Buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <button onClick={handleGoogleLogin}
-              type="button"
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg shadow-sm bg-gray-800 text-sm font-medium text-gray-300 hover:bg-gray-700"
+            <GoogleOAuthProvider 
+              clientId="240605677314-gbb00fo5vniqo8gk1ask03im88ak48ts.apps.googleusercontent.com"
+              className="w-full"
             >
-              <Github className="h-5 w-5 mr-2" /> GitHub
-            </button>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleFailure}
+                type="icon"
+                theme="filled_blue"
+                size="large"
+                text="continue_with"
+                width="350"
+              />
+            </GoogleOAuthProvider>
+
             <button 
               type="button"
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg shadow-sm bg-gray-800 text-sm font-medium text-gray-300 hover:bg-gray-700"
@@ -221,6 +250,7 @@ const Signup = () => {
               Already have an account?{' '}
               <a 
                 href="#" 
+                onClick={handleLogin}
                 className="font-medium text-blue-500 hover:text-blue-400"
               >
                 Log in

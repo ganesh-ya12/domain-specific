@@ -1,98 +1,155 @@
-// ChatBot.jsx
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Send, Paperclip, Trash2, Plus, Menu, X } from 'lucide-react';
 
 const ChatBot = () => {
-  const [messages, setMessages] = useState([
-    { role: 'bot', content: 'Hello! How can I help you today?' }
-  ]);
-  const [input, setInput] = useState('');
-  const messagesEndRef = useRef(null);
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const fileInputRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const newMessages = [
-      ...messages,
-      { role: 'user', content: input },
-      { role: 'bot', content: 'This is a demo response. Connect your AI backend for real responses.' }
-    ];
-    
-    setMessages(newMessages);
-    setInput('');
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+  const handleSendMessage = () => {
+    if (inputMessage.trim() || uploadedFiles.length > 0) {
+      const newMessage = {
+        id: Date.now(),
+        content: inputMessage,
+        files: [...uploadedFiles],
+        sender: 'user'
+      };
+      setMessages([...messages, newMessage]);
+      setInputMessage('');
+      setUploadedFiles([]);
     }
   };
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="bg-[#0A0A0A] border border-gray-800 rounded-lg h-[600px] flex flex-col">
-        <div className="flex items-center space-x-2 p-4 border-b border-gray-800">
-          <Bot className="h-6 w-6 text-indigo-500" />
-          <span className="text-white font-medium">AI Assistant</span>
-        </div>
+  const handleFileUpload = (event) => {
+    const newFiles = Array.from(event.target.files);
+    setUploadedFiles([...uploadedFiles, ...newFiles]);
+  };
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex items-start space-x-2 ${
-                message.role === 'user' ? 'justify-end' : ''
-              }`}
+  const removeFile = (fileToRemove) => {
+    setUploadedFiles(uploadedFiles.filter(file => file !== fileToRemove));
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  return (
+    <div className="min-h-screen flex w-screen bg-slate-900 text-slate-100">
+      {/* Sidebar */}
+      {isSidebarOpen && (
+        <div className="w-64 bg-slate-800 p-4 border-r border-slate-700 transition-all duration-300 ease-in-out">
+          <div className="flex justify-between items-center mb-4">
+            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded mr-2 flex items-center justify-center">
+              <Plus size={20} className="mr-2" /> New Chat
+            </button>
+            <button 
+              onClick={toggleSidebar}
+              className="bg-slate-700 hover:bg-slate-600 p-2 rounded"
             >
-              {message.role === 'bot' && (
-                <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center">
-                  <Bot className="h-5 w-5 text-indigo-500" />
-                </div>
-              )}
-              <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.role === 'user'
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-800 text-gray-200'
+              <X size={20} />
+            </button>
+          </div>
+          <div className="space-y-2">
+            <div className="text-slate-400">Previous Chats</div>
+            {/* Previous chat list would go here */}
+            <div className="bg-slate-700 p-2 rounded hover:bg-slate-600 cursor-pointer">
+              Chat History 1
+            </div>
+            <div className="bg-slate-700 p-2 rounded hover:bg-slate-600 cursor-pointer">
+              Chat History 2
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Chat Area */}
+      <div className="flex flex-col flex-1 relative">
+        {/* Sidebar Toggle Button */}
+        {!isSidebarOpen && (
+          <button 
+            onClick={toggleSidebar}
+            className="absolute top-4 left-4 z-10 bg-slate-700 hover:bg-slate-600 p-2 rounded"
+          >
+            <Menu size={20} />
+          </button>
+        )}
+
+        {/* Messages Container */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((message) => (
+            <div 
+              key={message.id} 
+              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div 
+                className={`max-w-xl p-3 rounded-lg ${
+                  message.sender === 'user' 
+                    ? 'bg-blue-700 text-white' 
+                    : 'bg-slate-700 text-white'
                 }`}
               >
                 {message.content}
+                {message.files && message.files.map((file) => (
+                  <div key={file.name} className="mt-2 text-sm text-slate-200">
+                    📄 {file.name}
+                  </div>
+                ))}
               </div>
-              {message.role === 'user' && (
-                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-                  <User className="h-5 w-5 text-gray-300" />
-                </div>
-              )}
             </div>
           ))}
-          <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-4 border-t border-gray-800">
-          <div className="flex space-x-4">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message..."
-              className="flex-1 bg-gray-800 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-              rows="1"
+        {/* File Upload Preview */}
+        {uploadedFiles.length > 0 && (
+          <div className="bg-slate-800 p-2 flex space-x-2 items-center">
+            {uploadedFiles.map((file) => (
+              <div 
+                key={file.name} 
+                className="flex items-center bg-slate-700 p-1 rounded"
+              >
+                <span className="mr-2 text-sm">{file.name}</span>
+                <button 
+                  onClick={() => removeFile(file)}
+                  className="text-red-400 hover:text-red-600"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Input Area */}
+        <div className="bg-slate-800 p-4 border-t border-slate-700">
+          <div className="flex space-x-2">
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              multiple 
+              className="hidden" 
             />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim()}
-              className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            <button 
+              onClick={() => fileInputRef.current.click()}
+              className="bg-slate-700 hover:bg-slate-600 p-2 rounded"
             >
-              <Send className="h-5 w-5" />
+              <Paperclip size={20} />
+            </button>
+            <input 
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              placeholder="Send a message..."
+              className="flex-1 bg-slate-700 text-white p-2 rounded"
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            />
+            <button 
+              onClick={handleSendMessage}
+              className="bg-blue-600 hover:bg-blue-700 p-2 rounded"
+            >
+              <Send size={20} />
             </button>
           </div>
         </div>
