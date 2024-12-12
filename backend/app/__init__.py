@@ -2,7 +2,9 @@ from flask import Flask,jsonify
 import os
 from .config import DevelopmentConfig,ProductionConfig
 from .database import init_db
+from .vectorDB import init_vector_store
 from .routes import register_blueprints
+from .services.vectorProcessor import VectorStoreManager
 from flask_cors import CORS
 def create_app():
     app=Flask(__name__)
@@ -30,6 +32,9 @@ def create_app():
     else:
         app.config.from_object(ProductionConfig)
     init_db(app)
+    init_vector_store(app)
+    with app.app_context():
+        app.vector_manager = VectorStoreManager()
     register_blueprints(app)
     @app.route('/')
     def home():

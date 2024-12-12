@@ -5,6 +5,8 @@ mongo=PyMongo()
 def init_db(app):
         try:
             mongo.init_app(app)
+            print("MongoDB connected Successfully")
             logging.info("MongoDB connected successfully.")
+            
         except Exception as e:
             logging.error(f"Error connecting to MongoDB: {str(e)}")
