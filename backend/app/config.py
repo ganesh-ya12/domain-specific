@@ -8,6 +8,9 @@ class Config:
     CACHE_DIR = os.getenv('CACHE_DIR', './model_cache')
     DEBUG = True
     LOG_FILE = os.getenv('LOG_FILE', './app.log')
+    PINECONE_API_KEY = os.getenv('PINECONE_KEY')
+    #PINECONE_ENV = "your-pinecone-environment"  # e.g., "us-west1-gcp"
+    COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 
 class DevelopmentConfig(Config):
     DEBUG = True
