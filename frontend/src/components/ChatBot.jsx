@@ -35,6 +35,30 @@ const ChatBot = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  // Function to send the file to Colab
+  const sendFileToColab = async () => {
+    if (uploadedFiles.length > 0) {
+      const formData = new FormData();
+      formData.append('file', uploadedFiles[0]);
+      formData.append('user_id', 'your_user_id');  // Replace this with actual user ID if needed
+
+      try {
+        const response = await fetch('https://0a77-34-125-56-121.ngrok-free.app/finetune', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+        if (response.ok) {
+          console.log("File uploaded successfully", data);
+        } else {
+          console.error("Error uploading file", data);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen flex w-screen bg-slate-900 text-slate-100">
       {/* Sidebar */}
@@ -146,7 +170,10 @@ const ChatBot = () => {
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             />
             <button 
-              onClick={handleSendMessage}
+              onClick={() => {
+                handleSendMessage();
+                sendFileToColab(); // Call the function to upload the file
+              }}
               className="bg-blue-600 hover:bg-blue-700 p-2 rounded"
             >
               <Send size={20} />

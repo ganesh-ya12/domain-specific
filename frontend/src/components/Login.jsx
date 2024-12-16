@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  Mail, 
-  Lock, 
-  LogIn, 
-  Github, 
-  Linkedin, 
-  AlertTriangle 
+import {
+  Mail,
+  Lock,
+  LogIn,
+  Github,
+  Linkedin,
+  AlertTriangle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  
+
   // Add navigation hook
   const navigate = useNavigate();
 
@@ -28,17 +29,44 @@ const Login = () => {
           'Content-Type': 'application/json',
         }
       });
-      
+
       if (response.status === 200) {
         setMessage('Login successful');
-        // Optional: Add navigation logic after successful login
-        // navigate('/dashboard');
         navigate('/')
       } else {
         setMessage(response);
       }
     } catch (error) {
-      setMessage('An error occurred');
+      setError('Invalid email or password');
+      console.log(error);
+    }
+  };
+
+  // Handler for Google login
+  const handleGoogleLogin = async (credentialResponse) => {
+    try {
+     // console.log(credentialResponse);
+      const response = await axios.post('http://localhost:5000/user/callback',
+        {
+          googleId: credentialResponse.googleId,
+          email: credentialResponse.email,
+          username: credentialResponse.name
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        setMessage(response.data.message);
+        navigate('/');
+      } else {
+        setError('Google login failed');
+      }
+    } catch (error) {
+      setError('Error during Google login');
       console.log(error);
     }
   };
@@ -55,21 +83,21 @@ const Login = () => {
           {/* Company Logo and Title */}
           <div className="text-center">
             <div className="flex justify-center mb-4">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="48" 
-                height="48" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 className="text-blue-500"
               >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <path d="M12 22V11l-4-2"/>
-                <path d="M16 13l-4-2"/>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="M12 22V11l-4-2" />
+                <path d="M16 13l-4-2" />
               </svg>
             </div>
             <h1 className="text-2xl font-bold text-gray-100">AI Bot Platform</h1>
@@ -90,7 +118,7 @@ const Login = () => {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Mail className="text-gray-500 h-5 w-5" />
               </div>
-              <input 
+              <input
                 type="email"
                 placeholder="Email address"
                 value={email}
@@ -104,7 +132,7 @@ const Login = () => {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Lock className="text-gray-500 h-5 w-5" />
               </div>
-              <input 
+              <input
                 type="password"
                 placeholder="Password"
                 value={password}
@@ -116,23 +144,23 @@ const Login = () => {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <input 
+                <input
                   type="checkbox"
                   id="remember-me"
                   checked={rememberMe}
                   onChange={() => setRememberMe(!rememberMe)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 bg-gray-700 border-gray-600 rounded"
                 />
-                <label 
-                  htmlFor="remember-me" 
+                <label
+                  htmlFor="remember-me"
                   className="ml-2 block text-sm text-gray-300"
                 >
                   Remember me
                 </label>
               </div>
               <div className="text-sm">
-                <a 
-                  href="#" 
+                <a
+                  href="#"
                   className="font-medium text-blue-500 hover:text-blue-400"
                 >
                   Forgot password?
@@ -140,8 +168,8 @@ const Login = () => {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300"
             >
               <LogIn className="mr-2 h-5 w-5" /> Sign In
@@ -162,13 +190,37 @@ const Login = () => {
 
           {/* Social Login Buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <button 
-              type="button"
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg shadow-sm bg-gray-800 text-sm font-medium text-gray-300 hover:bg-gray-700"
+            <GoogleOAuthProvider
+              clientId="240605677314-gbb00fo5vniqo8gk1ask03im88ak48ts.apps.googleusercontent.com"
+              className="w-full"
             >
-              <Github className="h-5 w-5 mr-2" /> GitHub
-            </button>
-            <button 
+              <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                  // Decode the credential and extract user information
+                  const credentialDetails = credentialResponse.credential
+                    ? JSON.parse(atob(credentialResponse.credential.split('.')[1]))
+                    : {};
+
+                  const modifiedCredentialResponse = {
+                    googleId: credentialDetails.sub, // Google's unique user ID
+                    email: credentialDetails.email,
+                    name: credentialDetails.name
+                  };
+
+                  handleGoogleLogin(modifiedCredentialResponse);
+                }}
+                onError={() => {
+                  setError('Google login failed');
+                }}
+                theme="filled_black"
+                shape="rectangular"
+                size="large"
+                text="signin_with"
+                width="100%"
+              />
+            </GoogleOAuthProvider>
+
+            <button
               type="button"
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg shadow-sm bg-gray-800 text-sm font-medium text-gray-300 hover:bg-gray-700"
             >
@@ -180,7 +232,7 @@ const Login = () => {
           <div className="text-center">
             <p className="mt-2 text-sm text-gray-500">
               Don't have an account?{' '}
-              <button 
+              <button
                 onClick={handleSignupNavigation}
                 className="font-medium text-blue-500 hover:text-blue-400"
               >
