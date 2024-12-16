@@ -19,29 +19,44 @@ const Login = () => {
   
   // Add navigation hook
   const navigate = useNavigate();
-
   const handleLogin = async (e) => {
     e.preventDefault();
+    setMessage(''); // Clear any previous messages
+    
     try {
-      const response = await axios.post('http://127.0.0.1:5000/user/login', { email, password }, {
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.post('http://127.0.0.1:5000/user/login', 
+        { email, password }, 
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
         }
-      });
-      
+      );
+  
+      // Check for the correct status code (200)
       if (response.status === 200) {
         setMessage('Login successful');
-        // Optional: Add navigation logic after successful login
-        // navigate('/dashboard');
-        navigate('/')
-      } else {
-        setMessage(response);
-      }
+        
+        // Extract the token from the response
+        const { token } = response.data;
+  
+        // Save the token to localStorage
+        localStorage.setItem('token', token);
+  
+        // Optional: Navigate after successful login
+        navigate('/chat');
+      } 
     } catch (error) {
-      setMessage('An error occurred');
-      console.log(error);
+      // Handle errors
+      if (error.response) {
+        setMessage(error.response.data.message || 'Login failed');
+      } else {
+        setMessage('An error occurred. Please try again.');
+      }
+      console.error('Login error:', error);
     }
   };
+  
 
   // Handler for navigating to signup page
   const handleSignupNavigation = () => {

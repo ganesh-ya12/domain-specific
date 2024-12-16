@@ -50,7 +50,7 @@ const Signup = () => {
         setMessage('Signup successful');
         // localStorage.setItem();
         setError('');
-        navigate('/home');
+        navigate('/login');
       } else {
         setMessage('Signup failed');
       }
