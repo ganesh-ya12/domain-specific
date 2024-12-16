@@ -20,13 +20,17 @@ const Login = () => {
 
   // Add navigation hook
   const navigate = useNavigate();
-
   const handleLogin = async (e) => {
     e.preventDefault();
+    setMessage(''); // Clear any previous messages
+    
     try {
-      const response = await axios.post('http://127.0.0.1:5000/user/login', { email, password }, {
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.post('http://127.0.0.1:5000/user/login', 
+        { email, password }, 
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
         }
       });
 
@@ -70,6 +74,7 @@ const Login = () => {
       console.log(error);
     }
   };
+  
 
   // Handler for navigating to signup page
   const handleSignupNavigation = () => {

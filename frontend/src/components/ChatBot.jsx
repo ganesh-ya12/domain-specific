@@ -43,7 +43,7 @@ const ChatBot = () => {
       formData.append('user_id', 'your_user_id');  // Replace this with actual user ID if needed
 
       try {
-        const response = await fetch('https://0a77-34-125-56-121.ngrok-free.app/finetune', {
+        const response = await fetch('https://8de3-34-105-91-239.ngrok-free.app/finetune', {
           method: 'POST',
           body: formData,
         });
