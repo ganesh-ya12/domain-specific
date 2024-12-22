@@ -32,7 +32,7 @@ const Login = () => {
             'Content-Type': 'application/json',
           }
         }
-      });
+      );
 
       if (response.status === 200) {
         setMessage('Login successful');
