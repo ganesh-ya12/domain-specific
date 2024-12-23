@@ -40,7 +40,7 @@ const FileUploader = () => {
     formData.append("file", files[0]); // Sending the first file as an example
   
     try {
-      const response = await fetch("https://2dc7-34-87-154-34.ngrok-free.app/process_pdf", {
+      const response = await fetch("https://576e-34-125-104-111.ngrok-free.app/process_pdf", {
         method: "POST",
         body: formData,
       });
