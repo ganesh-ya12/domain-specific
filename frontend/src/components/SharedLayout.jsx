@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import jwtDecode from 'jwt-decode'; // Install this with `npm install jwt-decode`
 import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Bot, User, LogOut, Settings } from 'lucide-react';
 
-const SharedLayout = ({ user, setUser }) => { // Accept user and setUser as props
+const SharedLayout = ({ user, setUser }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [decodedUser, setDecodedUser] = useState(null); // Store decoded user information
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -15,7 +17,20 @@ const SharedLayout = ({ user, setUser }) => { // Accept user and setUser as prop
     { path: '/about', label: 'About' },
   ];
 
-  // Logout function to clear token and reset user state
+  useEffect(() => {
+    // Decode the token to extract user information
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token); // Decode the JWT
+        setDecodedUser(decoded); // Store decoded user info
+      } catch (error) {
+        console.error('Invalid token:', error);
+        handleLogout(); // Logout if token is invalid
+      }
+    }
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('token'); // Remove token from localStorage
     setUser(null); // Update the user state to null
@@ -31,7 +46,7 @@ const SharedLayout = ({ user, setUser }) => { // Accept user and setUser as prop
               <Bot className="h-8 w-8 text-indigo-500" />
               <span className="text-xl font-bold text-white">BotForge</span>
             </Link>
-            
+
             <div className="hidden md:flex items-center space-x-8">
               {navLinks.map(({ path, label }) => (
                 <Link
@@ -45,14 +60,6 @@ const SharedLayout = ({ user, setUser }) => { // Accept user and setUser as prop
                 </Link>
               ))}
 
-              <Link
-                to="/dashboard"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                Dashboard
-              </Link>
-
-              {/* Conditionally render the Login or Profile buttons */}
               {!user ? (
                 <Link
                   to="/login"
@@ -73,8 +80,14 @@ const SharedLayout = ({ user, setUser }) => { // Accept user and setUser as prop
                   {isProfileOpen && (
                     <div className="absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-800 rounded-lg shadow-lg py-2">
                       <div className="px-4 py-3 border-b border-gray-800">
-                        <p className="text-sm text-white">John Doe</p>
-                        <p className="text-xs text-gray-400">john.doe@example.com</p>
+                        {decodedUser ? (
+                          <>
+                            <p className="text-sm text-white">{decodedUser.username}</p>
+                            <p className="text-xs text-gray-400">{decodedUser.email}</p>
+                          </>
+                        ) : (
+                          <p className="text-sm text-gray-400">User information not available</p>
+                        )}
                       </div>
                       <div className="py-1">
                         <Link
@@ -85,7 +98,7 @@ const SharedLayout = ({ user, setUser }) => { // Accept user and setUser as prop
                           Profile Settings
                         </Link>
                         <button
-                          onClick={handleLogout} // Call the logout function
+                          onClick={handleLogout}
                           className="w-full flex items-center px-4 py-2 text-sm text-red-500 hover:bg-gray-800"
                         >
                           <LogOut className="h-4 w-4 mr-2" />
@@ -123,12 +136,6 @@ const SharedLayout = ({ user, setUser }) => { // Accept user and setUser as prop
                   {label}
                 </Link>
               ))}
-              <Link
-                to="/dashboard"
-                className="block px-3 py-2 text-base text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
-              >
-                Dashboard
-              </Link>
               {!user && (
                 <Link
                   to="/login"

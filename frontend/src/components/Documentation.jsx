@@ -147,7 +147,7 @@ else:
   );
 
   return (
-    <div className="min-h-screen w-screen overflow-x-hidden bg-black text-white">
+    <div className="min-h-screen w-full overflow-x-hidden bg-black text-white">
       <div className="w-full max-w-full px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-[300px_1fr] gap-8 py-16 w-full">
           <aside className="w-full">

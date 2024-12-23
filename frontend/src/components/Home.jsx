@@ -1,4 +1,3 @@
-// Home.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Bot, Code, Shield, Zap, ChevronRight } from 'lucide-react';
@@ -15,7 +14,7 @@ const FeatureCard = ({ icon: Icon, title, description }) => (
 
 const Home = () => {
   return (
-    <div className="relative overflow-hidden bg-black w-screen">
+    <div className="relative overflow-hidden bg-black w-full">
       {/* Hero Section */}
       <section className="relative pt-16 md:pt-24 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,14 +28,14 @@ const Home = () => {
               Deploy intelligent chatbots in minutes. Enhance your application with AI-powered conversations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                to="/chat" 
+              <Link
+                to="/chat"
                 className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:opacity-90 transition-all transform hover:scale-105"
               >
                 Try Demo
               </Link>
-              <Link 
-                to="/docs" 
+              <Link
+                to="/docs"
                 className="group bg-white/5 text-white px-8 py-3 rounded-lg hover:bg-white/10 transition-all transform hover:scale-105 backdrop-blur-sm"
               >
                 View Docs
@@ -63,17 +62,17 @@ const Home = () => {
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <FeatureCard 
+            <FeatureCard
               icon={Code}
               title="Easy Integration"
               description="Simple API and SDKs for all major platforms. Get started with just a few lines of code."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={Shield}
               title="Enterprise Security"
               description="End-to-end encryption and data privacy. SOC2 compliance and custom data residency options."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={Zap}
               title="Smart Responses"
               description="Powered by state-of-the-art language models including GPT-4 and Claude."
@@ -89,8 +88,8 @@ const Home = () => {
           <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
             Join thousands of developers building the future of conversation.
           </p>
-          <Link 
-            to="/docs" 
+          <Link
+            to="/docs"
             className="inline-flex items-center bg-white text-gray-900 px-8 py-3 rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105"
           >
             Get Started
