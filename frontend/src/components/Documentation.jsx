@@ -12,43 +12,75 @@ const Documentation = () => {
           <p>Welcome to BotForge! Follow these steps to begin:</p>
           <div className="bg-gray-900 p-6 rounded-lg my-4">
             <pre className="text-sm text-gray-300"><code>{`
-# Install the SDK
-npm install @botforge/sdk
 
-# Import and initialize
-import { BotForge } from '@botforge/sdk';
+import requests
 
-const bot = new BotForge({
-  apiKey: 'YOUR_API_KEY',
-  model: 'gpt-4'
-});
+# Define the API endpoint and your API key
+api_endpoint = "https://api.yourdomain.com/chatbot"
+api_key = "YOUR_API_KEY"
 
-// Initialize the bot
-await bot.initialize();
+# Define the prompt for the chatbot
+prompt = {"prompt": "Explain how our custom chatbot works"}
+
+# Send a POST request to the API
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(api_endpoint, json=prompt, headers=headers)
+
+# Check if the request was successful
+if response.status_code == 200:
+    chatbot_response = response.json().get("response", "No response received")
+    print(chatbot_response)
+else:
+    print(f"Error: {response.status_code} - {response.text}")
+
+
             `.trim()}</code></pre>
           </div>
           <p>Make sure to replace <code>YOUR_API_KEY</code> with your actual BotForge API key.</p>
         </div>
       )
     },
-    { 
-      id: 'installation', 
+    {
+      id: 'installation',
       title: 'Installation',
       content: (
         <div>
           <h3>Installation Options</h3>
+    
+          {/* Direct Download Instructions */}
+          <h4>Direct Download</h4>
           <div className="bg-gray-900 p-6 rounded-lg my-4">
-            <h4>NPM</h4>
-            <code className="block bg-gray-800 p-2 rounded">npm install @botforge/sdk</code>
-            
-            <h4>Yarn</h4>
-            <code className="block bg-gray-800 p-2 rounded mt-2">yarn add @botforge/sdk</code>
+            <p>1. Clone the repository:</p>
+            <code className="block bg-gray-800 p-2 rounded">git clone https://github.com/your-org/custom-chatbot.git</code>
+            <p>2. Install dependencies:</p>
+            <code className="block bg-gray-800 p-2 rounded">cd custom-chatbot</code>
+            <code className="block bg-gray-800 p-2 rounded">pip install -r requirements.txt</code>
+          </div>
+    
+          {/* Using Python's pip Package Manager */}
+          <h4>Using Python's <code>pip</code> Package Manager</h4>
+          <div className="bg-gray-900 p-6 rounded-lg my-4">
+            <p>1. Install the custom chatbot package:</p>
+            <code className="block bg-gray-800 p-2 rounded">pip install custom-chatbot</code>
+          </div>
+    
+          {/* Using HTTP API Integration */}
+          <h4>Using HTTP API Integration (No Installation Required)</h4>
+          <div className="bg-gray-900 p-6 rounded-lg my-4">
+            <p>1. Install <code>requests</code>:</p>
+            <code className="block bg-gray-800 p-2 rounded">pip install requests</code>
+            <p>2. Follow the integration guide to call your chatbot's API directly.</p>
           </div>
         </div>
       )
     },
-    { 
-      id: 'api-reference', 
+    
+    {
+      id: 'api-reference',
       title: 'API Reference',
       content: (
         <div>
@@ -56,40 +88,56 @@ await bot.initialize();
           <ul className="space-y-4 bg-gray-900 p-6 rounded-lg">
             <li>
               <strong>initialize()</strong>
-              <p className="text-gray-400">Initializes the BotForge client with configuration.</p>
+              <p className="text-gray-400">Initializes the custom chatbot client with configuration.</p>
             </li>
             <li>
               <strong>createConversation()</strong>
-              <p className="text-gray-400">Creates a new conversation instance.</p>
+              <p className="text-gray-400">Creates a new conversation instance for the chatbot.</p>
             </li>
             <li>
               <strong>sendMessage()</strong>
-              <p className="text-gray-400">Sends a message and receives a response.</p>
+              <p className="text-gray-400">Sends a message to the chatbot and receives a response.</p>
+            </li>
+            <li>
+              <strong>fetchAPIData()</strong>
+              <p className="text-gray-400">Fetches data from the chatbot API for integration.</p>
+            </li>
+            <li>
+              <strong>closeConversation()</strong>
+              <p className="text-gray-400">Ends the current conversation session with the chatbot.</p>
             </li>
           </ul>
         </div>
       )
     },
-    { 
-      id: 'examples', 
+    
+    {
+      id: 'examples',
       title: 'Examples',
       content: (
         <div>
           <h3>Basic Usage Example</h3>
           <div className="bg-gray-900 p-6 rounded-lg">
             <pre className="text-sm text-gray-300"><code>{`
-const conversation = bot.createConversation();
-
-const response = await conversation.sendMessage(
-  'Help me write a Python script to parse JSON.'
-);
-
-console.log(response.text);
+    # Initialize the custom chatbot client
+    const chatbot = new CustomChatbotClient();
+    
+    # Start a new conversation
+    const conversation = chatbot.createConversation();
+    
+    # Send a message to the chatbot and get a response
+    const response = await conversation.sendMessage(
+      'Help me write a Python script to parse JSON.'
+    );
+    
+    # Log the chatbot's response
+    console.log(response.text);
             `.trim()}</code></pre>
           </div>
         </div>
       )
     }
+    
   ];
 
   const [activeSection, setActiveSection] = useState(sections[0].id);
