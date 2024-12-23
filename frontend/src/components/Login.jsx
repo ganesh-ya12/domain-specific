@@ -38,7 +38,7 @@ const Login = () => {
         const token = response.data;
         setMessage('Login successful');
         localStorage.setItem('token',token);
-        navigate('/chatbot')
+        navigate('/chat')
       } else {
         setMessage(response);
       }
