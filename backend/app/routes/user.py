@@ -68,54 +68,82 @@ def get_jwt_secret():
 #     response = make_response(jsonify({'message': "Login successful", "token": token}))
 #     response.set_cookie('access_token', token, httponly=True, secure=True, samesite='None')
 #     return response
+def create_payload(username, email, exp_days=30):
+    """
+    Create a JWT payload with the given username, email, and expiration days.
+
+    :param username: User's username
+    :param email: User's email
+    :param exp_days: Number of days until the token expires
+    :return: Payload dictionary
+    """
+    return {
+        "username": username,
+        "email": email,
+        'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=exp_days)
+    }
+
+
 @user_bp.route('/callback', methods=["POST"])
-def google_signup():
+def google_auth():
     data = request.get_json()
-    print(type(data['googleId']))
-    print(f"Google Signup request data: {data}")
-    
+    # print(type(data['googleId']))
+    # print(f"Google Auth request data: {data}")
+    print(type(data['email']))
+    print(f"Google Auth request data: {data}")
+
     try:
         # Check if user already exists
         existing_user = mongo.db.users.find_one({"email": data['email']})
+
         if existing_user:
-            return jsonify({"message": "User already exists"}), 400
-        
-        # Create a new user with Google signup data
-        user_data = {
-            'email': data['email'],
-            'username': data['username'],
-            'google_id': str(data.get('googleId')),  # Store Google's unique user ID
-            'created_at': datetime.datetime.utcnow(),
-            'access_level': 'user',  # Default access level
-            'signup_method': 'google'
-        }
-        
-        # Insert the new user
-        new_user = mongo.db.users.insert_one(user_data)
+            # If the user exists, log them in
+            payload = create_payload(existing_user['username'], existing_user['email'])
+            token = jwt.encode(payload, key=get_jwt_secret(), algorithm='HS256')
 
-        # Create JWT token for the user
-        payload = {
-            "username": user_data['username'],
-            "email": user_data['email'],
-            'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
-        }
+            response = make_response(jsonify({
+                'message': "Login successful",
+                "token": token,
+                "username": existing_user["username"]
+            }))
+            response.status_code = 200
+            response.set_cookie('access_token', token, httponly=True, secure=True, samesite='None')
 
-        token = jwt.encode(payload, key=get_jwt_secret(), algorithm='HS256')
-        
-        # Prepare response
-        response = make_response(jsonify({
-            'message': "User created successfully", 
-            "token": token, 
-            "username": user_data["username"]
-        }))
-        response.status_code = 201
-        response.set_cookie('access_token', token, httponly=True, secure=True, samesite='None')
-        
-        return response
-    
+            return response
+
+        else:
+            # If the user does not exist, create a new account
+
+            user_data = {
+                'email': data['email'],
+                'username': data['username'],
+                'google_id': str(data.get('googleId')),  # Store Google's unique user ID
+                'created_at': datetime.datetime.utcnow(),
+                'access_level': 'user',  # Default access level
+                'signup_method': 'google'
+            }
+
+            # Insert the new user
+            mongo.db.users.insert_one(user_data)
+
+            # Create JWT token for the new user
+            payload = create_payload(user_data['username'], user_data['email'])
+            token = jwt.encode(payload, key=get_jwt_secret(), algorithm='HS256')
+
+            response = make_response(jsonify({
+                'message': "Signup successful",
+                "token": token,
+                "username": user_data["username"]
+            }))
+            response.status_code = 201
+            response.set_cookie('access_token', token, httponly=True, secure=True, samesite='None')
+
+            return response
+
     except Exception as e:
-        print(f"Error in Google signup: {str(e)}")
-        return jsonify({"message": f"Error creating user: {str(e)}"}), 500
+        print(f"Error in Google Auth: {str(e)}")
+        return jsonify({"message": f"Error processing request: {str(e)}"}), 500
+
 # GitHub OAuth Callback Route
 @user_bp.route('/github/callback')
 def github_callback():

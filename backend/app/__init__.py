@@ -31,10 +31,26 @@ def create_app():
         app.config.from_object(DevelopmentConfig)
     else:
         app.config.from_object(ProductionConfig)
-    init_db(app)
-    init_vector_store(app)
+    try:
+        init_db(app)
+    except Exception as db_error:
+        print(f"Database initialization failed: {db_error}")
+        raise
+
+    # Initialize the vector store
+    try:
+        init_vector_store(app)
+    except Exception as vector_error:
+        print(f"Vector store initialization failed: {vector_error}")
+        raise
+
+    # Attach vector manager to app
     with app.app_context():
-        app.vector_manager = VectorStoreManager()
+        try:
+            app.vector_manager = VectorStoreManager()
+        except Exception as manager_error:
+            print(f"Vector manager initialization failed: {manager_error}")
+            raise
     register_blueprints(app)
     @app.route('/')
     def home():
