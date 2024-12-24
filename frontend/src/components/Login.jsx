@@ -34,9 +34,11 @@ const Login = () => {
         }
       );
 
-      if (response.status === 200) {
+      if (response.status == 200) {
+        const token = response.data;
         setMessage('Login successful');
-        navigate('/')
+        localStorage.setItem('token',token);
+        navigate('/chat')
       } else {
         setMessage(response);
       }

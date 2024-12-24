@@ -45,13 +45,6 @@ const SharedLayout = ({ user, setUser }) => { // Accept user and setUser as prop
                 </Link>
               ))}
 
-              <Link
-                to="/dashboard"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                Dashboard
-              </Link>
-
               {/* Conditionally render the Login or Profile buttons */}
               {!user ? (
                 <Link
@@ -123,12 +116,6 @@ const SharedLayout = ({ user, setUser }) => { // Accept user and setUser as prop
                   {label}
                 </Link>
               ))}
-              <Link
-                to="/dashboard"
-                className="block px-3 py-2 text-base text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
-              >
-                Dashboard
-              </Link>
               {!user && (
                 <Link
                   to="/login"

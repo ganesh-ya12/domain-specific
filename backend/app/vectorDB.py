@@ -14,7 +14,7 @@ def init_vector_store(app):
 
         # Initialize embedding model
         embedding_model = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_name="BAAI/bge-large-en",
             cache_folder=Config.CACHE_DIR
         )
 
