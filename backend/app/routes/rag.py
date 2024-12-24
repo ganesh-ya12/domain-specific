@@ -1,5 +1,5 @@
-from flask import Blueprint,jsonify,request,current_app
-from ..middleware.userMiddleware import token_required
+from flask import Blueprint,jsonify,request,current_app,g
+from ..middleware.headerMiddleware import token_required
 import jwt
 import requests
 import os 
@@ -18,7 +18,6 @@ def get_user_email(token):
 @token_required
 def give_response():
     try:
-        token=request.cookies.get('access_token')
         data = request.get_json()
 
         if not data:
@@ -26,7 +25,7 @@ def give_response():
         
 
         query = data.get('query')
-        user_email=get_user_email(token)
+        user_email=g.email
         top_k = data.get('top_k', 5) 
         if not user_email:
             return jsonify({"error": "Invalid or missing token"}), 401
@@ -37,7 +36,7 @@ def give_response():
         formatted_results = [
             {"content": result.page_content, "score": score} for result,score in vector_input
                     ]
-        playload={'instruction':query,'input':formatted_results,'user_id':user_email}
+        playload={'instruction':query,'input':formatted_results,'user_id':g.user}
         url=os.getenv('NGROK_URL')
         print(url)
         response=requests.post(url=f"https://8daa-34-125-30-122.ngrok-free.app/infer",json=playload)

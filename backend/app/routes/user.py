@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, make_response, redirect, request, url_for
+from flask import Blueprint, jsonify, make_response, redirect, request, url_for,g
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
 import bcrypt
@@ -238,12 +238,33 @@ def login():
     response.set_cookie('access_token', token, httponly=True, secure=True, samesite='None')
     
     return response
-
 @user_bp.route('/logout', methods=['GET'])
 def logout():
-    response = make_response(jsonify({"message": "Logged out successfully"}))
-    response.set_cookie('access_token', '', expires=0)
-    return response
+    try:
+        response = make_response(jsonify({"message": "Logged out successfully"}))
+        response.set_cookie('access_token', '', expires=0)
+        return response
+        
+    except Exception as e:
+        return jsonify({"message": "Logout failed", "details": str(e)}), 500
+
+@user_bp.route('/delete_user', methods=['DELETE'])
+@token_required  # Ensure the user is authenticated
+def delete_user():
+    try:
+        username = g.user['username']  # Get the username from the authenticated user context
+
+        # Find and delete the user from the database
+        result = mongo.db.users.delete_one({"username": username})
+
+        if result.deleted_count == 0:
+            return jsonify({"message": "User not found or already deleted"}), 404
+
+        return jsonify({"message": f"User {username} deleted successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": "An error occurred while deleting the user", "details": str(e)}), 500
+
 
 @user_bp.route('/preferences', methods=["POST"])
 @token_required

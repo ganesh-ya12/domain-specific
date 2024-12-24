@@ -1,6 +1,7 @@
 from .user import user_bp,google_bp
 from .vector import vector_bp
 from .rag import rag_bp
+from .admin import admin_bp
 
 def register_blueprints(app):
     app.register_blueprint(user_bp,url_prefix='/user')
@@ -8,5 +9,6 @@ def register_blueprints(app):
    # app.register_buleprint(vector_bp,url_prefix='/vector')
     app.register_blueprint(vector_bp, url_prefix='/vector')
     app.register_blueprint(rag_bp,url_prefix='/rag')
+    app.register_blueprint(admin_bp,url_prefix='/admin')
    # app.register_buleprint(files_bp,url_prefix='/file')
     
