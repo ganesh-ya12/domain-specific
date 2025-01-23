@@ -5,3 +5,5 @@ __pycache__
 model_cache/
 .model_cache/
 .model_cache/**/*/
+.env
+/.env
